@@ -1,0 +1,1783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey Activation Module - Revised</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #2563eb;
+            --light-blue: #eff6ff;
+            --dark-gray: #374151;
+            --light-gray: #f3f4f6;
+            --border-gray: #e5e7eb;
+            --success-green: #10b981;
+            --error-red: #ef4444;
+            --warning-orange: #f59e0b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #fafbfc;
+            color: var(--dark-gray);
+            line-height: 1.5;
+        }
+
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--border-gray);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--dark-gray);
+            border: 1px solid var(--border-gray);
+        }
+
+        .btn-secondary:hover {
+            background: var(--light-gray);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 5px;
+        }
+
+        /* Card Styling */
+        .card {
+            background: white;
+            border: 1px solid var(--border-gray);
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .card-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .card-header .badge {
+            background: var(--light-blue);
+            color: var(--primary-blue);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Tab Navigation */
+        .tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid var(--border-gray);
+            margin-bottom: 24px;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s ease;
+        }
+
+        .tab:hover {
+            color: var(--dark-gray);
+        }
+
+        .tab.active {
+            color: var(--primary-blue);
+            border-bottom-color: var(--primary-blue);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--dark-gray);
+        }
+
+        .form-group .help-text {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .form-group .required {
+            color: var(--error-red);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-gray);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .input-group.three {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        /* Multi-select */
+        .multi-select {
+            border: 1px solid var(--border-gray);
+            border-radius: 6px;
+            padding: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .multi-select-item {
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .multi-select-item input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        /* Survey Selection */
+        .survey-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--light-blue);
+            border-radius: 6px;
+            border: 1px solid #bfdbfe;
+        }
+
+        .survey-selector .survey-icon {
+            font-size: 20px;
+        }
+
+        .survey-selector .survey-info h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .survey-selector .survey-info p {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .survey-selector .change-btn {
+            margin-left: auto;
+            padding: 6px 12px;
+            background: white;
+            border: 1px solid var(--border-gray);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* Conditions Section */
+        .conditions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .condition-group {
+            border: 1px solid var(--border-gray);
+            border-radius: 6px;
+            padding: 16px;
+            background: #fafbfc;
+        }
+
+        .condition-group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .condition-group-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--primary-blue);
+        }
+
+        .condition-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 12px;
+            margin-bottom: 12px;
+            align-items: end;
+        }
+
+        .condition-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .remove-btn {
+            background: var(--error-red);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .add-condition-btn {
+            margin-top: 12px;
+            padding: 8px 12px;
+            background: var(--light-blue);
+            color: var(--primary-blue);
+            border: 1px solid #bfdbfe;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Delivery Configuration */
+        .delivery-config {
+            border: 1px solid var(--border-gray);
+            border-radius: 6px;
+            padding: 20px;
+            background: white;
+            margin-bottom: 16px;
+        }
+
+        .delivery-config-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .delivery-config-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .priority-badge {
+            background: var(--light-gray);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 28px;
+        }
+
+        .toggle-switch input {
+            display: none;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 28px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--success-green);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Reminder Configuration */
+        .retry-option {
+            border: 1px solid var(--border-gray);
+            border-radius: 6px;
+            padding: 16px;
+            background: #fafbfc;
+            margin-bottom: 12px;
+        }
+
+        .retry-option-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .retry-number {
+            background: var(--primary-blue);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        /* Activation List */
+        .activation-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .activation-item {
+            border: 1px solid var(--border-gray);
+            border-radius: 6px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            transition: all 0.2s ease;
+        }
+
+        .activation-item:hover {
+            border-color: var(--primary-blue);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+        }
+
+        .activation-item-info {
+            flex: 1;
+        }
+
+        .activation-item-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .activation-item-meta {
+            font-size: 12px;
+            color: #6b7280;
+            display: flex;
+            gap: 12px;
+        }
+
+        .activation-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .icon-btn:hover {
+            background: var(--light-gray);
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            border: 1px solid #93c5fd;
+            color: #1e40af;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            border: 1px solid #fde68a;
+            color: #92400e;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeInModal 0.2s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeInModal {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .modal-footer {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-gray);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        /* Collapsible Sections */
+        .collapsible-section {
+            border: 1px solid var(--border-gray);
+            border-radius: 6px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .collapsible-header {
+            background: white;
+            padding: 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .collapsible-header:hover {
+            background: var(--light-gray);
+        }
+
+        .collapsible-header.active {
+            background: var(--light-blue);
+            color: var(--primary-blue);
+        }
+
+        .collapsible-icon {
+            font-size: 12px;
+            transition: transform 0.2s ease;
+        }
+
+        .collapsible-header.active .collapsible-icon {
+            transform: rotate(180deg);
+        }
+
+        .collapsible-body {
+            display: none;
+            padding: 20px;
+            background: #fafbfc;
+            border-top: 1px solid var(--border-gray);
+        }
+
+        .collapsible-header.active + .collapsible-body {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .input-group,
+            .input-group.three {
+                grid-template-columns: 1fr;
+            }
+
+            .condition-row {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+        }
+
+        /* Info Icon */
+        .info-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: var(--primary-blue);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 16px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: help;
+            margin-left: 4px;
+        }
+
+        .info-tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .info-tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+            font-weight: normal;
+        }
+
+        .info-tooltip .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #333 transparent transparent transparent;
+        }
+
+        .info-tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Status Indicator */
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-active {
+            background: var(--success-green);
+        }
+
+        .status-inactive {
+            background: #9ca3af;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .empty-state-description {
+            font-size: 14px;
+        }
+
+        /* Small Timeline */
+        .small-timeline {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 12px 16px;
+            background: white;
+            border: 1px solid var(--border-gray);
+            border-radius: 6px;
+        }
+
+        .small-timeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .small-timeline-step:hover .small-step-dot {
+            transform: scale(1.1);
+        }
+
+        .small-step-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid var(--border-gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .small-timeline-step.active .small-step-dot {
+            background: var(--primary-blue);
+            border-color: var(--primary-blue);
+            color: white;
+        }
+
+        .small-timeline-step.completed .small-step-dot {
+            background: var(--success-green);
+            border-color: var(--success-green);
+            color: white;
+        }
+
+        .small-step-label {
+            font-size: 11px;
+            font-weight: 500;
+            color: #6b7280;
+            white-space: nowrap;
+        }
+
+        .small-timeline-step.active .small-step-label {
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        /* Tab Styling */
+        .tab-btn {
+            padding: 12px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--dark-gray);
+        }
+
+        .tab-btn.active {
+            color: var(--primary-blue);
+            border-bottom-color: var(--primary-blue);
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>📊 Survey Activation Module</h1>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="showListView()">← Back to List</button>
+            <button class="btn btn-primary" onclick="showCreateEditView()">+ New Activation</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- List View -->
+        <div id="listView" class="main-layout">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Active Survey Activations</h2>
+                    <div style="display: flex; gap: 12px;">
+                        <input type="text" placeholder="Search activations..." style="width: 250px;">
+                        <select style="width: 150px;">
+                            <option>All Surveys</option>
+                            <option>Email Survey</option>
+                            <option>Voice Survey</option>
+                            <option>WhatsApp Survey</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="activation-list" id="activationList">
+                    <div class="activation-item">
+                        <div class="activation-item-info">
+                            <div class="activation-item-title">
+                                <span class="status-indicator status-active"></span>
+                                Feedback WebForm Survey - Sales Queue
+                            </div>
+                            <div class="activation-item-meta">
+                                <span>📧 Email Channel</span>
+                                <span>Priority: 1</span>
+                                <span>Conditions: 3</span>
+                                <span>Delivery Rules: 2</span>
+                            </div>
+                        </div>
+                        <div class="activation-item-actions">
+                            <button class="icon-btn" onclick="editActivation(1)" title="Edit">✏️</button>
+                            <button class="icon-btn" onclick="duplicateActivation(1)" title="Duplicate">📋</button>
+                            <button class="icon-btn" onclick="deleteActivation(1)" title="Delete">🗑️</button>
+                        </div>
+                    </div>
+
+                    <div class="activation-item">
+                        <div class="activation-item-info">
+                            <div class="activation-item-title">
+                                <span class="status-indicator status-active"></span>
+                                Voice Survey Prompt - Support Queue
+                            </div>
+                            <div class="activation-item-meta">
+                                <span>☎️ Voice Channel</span>
+                                <span>Priority: 2</span>
+                                <span>Conditions: 2</span>
+                                <span>Delivery Rules: 1</span>
+                            </div>
+                        </div>
+                        <div class="activation-item-actions">
+                            <button class="icon-btn" onclick="editActivation(2)" title="Edit">✏️</button>
+                            <button class="icon-btn" onclick="duplicateActivation(2)" title="Duplicate">📋</button>
+                            <button class="icon-btn" onclick="deleteActivation(2)" title="Delete">🗑️</button>
+                        </div>
+                    </div>
+
+                    <div class="activation-item">
+                        <div class="activation-item-info">
+                            <div class="activation-item-title">
+                                <span class="status-indicator status-inactive"></span>
+                                All Channel Survey - No Queue
+                            </div>
+                            <div class="activation-item-meta">
+                                <span>🌐 Multiple Channels</span>
+                                <span>Priority: 3</span>
+                                <span>Conditions: 1</span>
+                                <span>Delivery Rules: 3</span>
+                            </div>
+                        </div>
+                        <div class="activation-item-actions">
+                            <button class="icon-btn" onclick="editActivation(3)" title="Edit">✏️</button>
+                            <button class="icon-btn" onclick="duplicate(3)" title="Duplicate">📋</button>
+                            <button class="icon-btn" onclick="deleteActivation(3)" title="Delete">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create/Edit View -->
+        <div id="createEditView" style="display: none;" class="main-layout">
+            <!-- Small Timeline -->
+            <div class="small-timeline">
+                <div class="small-timeline-step active" id="tl-step1" onclick="goToStep(1)">
+                    <div class="small-step-dot">1</div>
+                    <div class="small-step-label">Survey</div>
+                </div>
+                <div class="small-timeline-step" id="tl-step2" onclick="goToStep(2)">
+                    <div class="small-step-dot">2</div>
+                    <div class="small-step-label">Config</div>
+                </div>
+                <div class="small-timeline-step" id="tl-step3" onclick="goToStep(3)">
+                    <div class="small-step-dot">3</div>
+                    <div class="small-step-label">Review</div>
+                </div>
+            </div>
+
+            <!-- Step 1: Survey Selection -->
+            <div id="step1" class="card" style="display: block;">
+                <div class="card-header">
+                    <h2>Step 1: Select Survey</h2>
+                </div>
+                <div class="form-group">
+                    <label>Survey <span class="required">*</span></label>
+                    <div class="survey-selector" id="surveyDisplay">
+                        <span class="survey-icon">📋</span>
+                        <div class="survey-info">
+                            <h3>No Survey Selected</h3>
+                            <p>Choose a survey to create activation</p>
+                        </div>
+                        <button class="change-btn" onclick="openSurveySelection()">Select Survey</button>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="goToStep(2)">Next: Configure</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Configuration with Tabs -->
+            <div id="step2" class="card" style="display: none;">
+                <div class="card-header">
+                    <h2>Step 2: Configure Activation</h2>
+                </div>
+
+                <!-- Tab Navigation -->
+                <div style="display: flex; gap: 0; border-bottom: 2px solid var(--border-gray); margin-bottom: 20px;">
+                    <button class="tab-btn active" onclick="switchTab('conditions')">Activation Conditions</button>
+                    <button class="tab-btn" onclick="switchTab('delivery')">Delivery Settings</button>
+                    <button class="tab-btn" onclick="switchTab('reminder')">Reminder Settings</button>
+                </div>
+
+                <!-- Tab 1: Conditions -->
+                <div id="tab-conditions" class="tab-panel" style="display: block;">
+                    <div class="alert alert-info" style="margin-bottom: 20px;">
+                        <span>ℹ️</span>
+                        <div><strong>Note:</strong> If no conditions are configured, this survey will be offered by default for all interactions.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Import Conditions from Existing Activation</label>
+                        <input type="text" placeholder="Search and select an activation...">
+                    </div>
+
+                    <div class="conditions-list" id="activationConditions">
+                    </div>
+
+                    <button style="margin-top: 16px; padding: 10px 16px; background: var(--light-blue); color: var(--primary-blue); border: 1px solid #bfdbfe; border-radius: 6px; cursor: pointer; font-weight: 500;" onclick="addConditionGroup()">+ Add Condition Group</button>
+                </div>
+
+                <!-- Tab 2: Delivery Settings -->
+                <div id="tab-delivery" class="tab-panel" style="display: none;">
+                    <div class="alert alert-info">
+                        <span>ℹ️</span>
+                        <div><strong>Important:</strong> Survey will be delivered in the same channel where the transfer was triggered. You can configure multiple delivery rules with different priorities and conditions.</div>
+                    </div>
+
+                <div class="delivery-config" id="deliveryConfig1">
+                    <div class="delivery-config-header">
+                        <span class="delivery-config-title">Delivery Rule #1</span>
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <span class="priority-badge">Priority: 1</span>
+                            <button class="icon-btn" onclick="removeDeliveryConfig(this)">🗑️</button>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Conditions -->
+                    <div class="form-group">
+                        <label style="font-weight: 600; margin-bottom: 12px;">Delivery Conditions</label>
+                        <div class="conditions-list delivery-conditions-list" style="margin-bottom: 16px;">
+                        </div>
+                        <button class="add-condition-btn" onclick="addDeliveryConditionGroup(this)">+ Add Condition Group</button>
+                    </div>
+
+                    <!-- Delivery Actions -->
+                    <div class="form-group">
+                        <label style="font-weight: 600; margin-bottom: 12px;">Delivery Actions</label>
+                        
+                        <label style="font-weight: 500; margin-bottom: 8px;">Select Channel</label>
+                        <select style="margin-bottom: 16px;">
+                            <option>-- Select Channel --</option>
+                            <option>Email</option>
+                            <option>SMS</option>
+                            <option>WhatsApp</option>
+                            <option>Web Messaging</option>
+                        </select>
+
+                        <label style="font-weight: 500; margin-bottom: 8px;">Channel Configuration</label>
+                        <input type="text" placeholder="Select or configure channel settings" style="margin-bottom: 16px;">
+
+                        <label>Customer Identification</label>
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <div>
+                                <label style="font-weight: 500; margin-bottom: 8px; display: block;">Participant Data Key</label>
+                                <input type="text" placeholder="e.g., email, phone" value="Feebak Customer Contact" style="width: 100%;">
+                            </div>
+                            <div>
+                                <label style="font-weight: 500; margin-bottom: 8px; display: block;">Custom Attributes Key</label>
+                                <input type="text" placeholder="e.g., email, phone" value="Feebak Customer Contact" style="width: 100%;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Schedule Survey Delivery -->
+                    <div class="form-group">
+                        <label style="font-weight: 600; margin-bottom: 12px;">Schedule Survey Delivery</label>
+                        <div style="margin-bottom: 12px;">
+                            <input type="radio" name="schedule1" value="immediate" checked> 
+                            <label style="display: inline; font-weight: normal;">Send Immediately</label>
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <input type="radio" name="schedule1" value="delay"> 
+                            <label style="display: inline; font-weight: normal;">After Delay</label>
+                            <div class="input-group" style="margin-top: 8px; margin-left: 24px;">
+                                <input type="number" placeholder="Enter hours" min="1">
+                                <select>
+                                    <option>Hours</option>
+                                    <option>Days</option>
+                                    <option>Minutes</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <input type="radio" name="schedule1" value="timeframe"> 
+                            <label style="display: inline; font-weight: normal;">Specific Time Frame</label>
+                            <div class="input-group" style="margin-top: 8px; margin-left: 24px;">
+                                <select>
+                                    <option>Monday - Friday</option>
+                                    <option>Monday - Sunday</option>
+                                    <option>Custom</option>
+                                </select>
+                                <div class="input-group two" style="grid-template-columns: 1fr 1fr;">
+                                    <input type="time" placeholder="From">
+                                    <input type="time" placeholder="To">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="addDeliveryRuleBtn" style="margin-top: 16px; padding: 10px 16px; background: var(--light-blue); color: var(--primary-blue); border: 1px solid #bfdbfe; border-radius: 6px; cursor: pointer; font-weight: 500;" onclick="addDeliveryConfig()">+ Add Delivery Rule</button>
+                </div>
+
+                <!-- Tab 3: Reminder Settings -->
+                <div id="tab-reminder" class="tab-panel" style="display: none;">
+                    <div class="alert alert-info" style="margin-bottom: 20px;">
+                        <span>ℹ️</span>
+                        <div><strong>Note:</strong> If no reminder rules are configured, this survey will be offered by default for all interactions.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Import Reminder Settings from Existing Activation</label>
+                        <input type="text" placeholder="Search and select an activation...">
+                    </div>
+
+                    <!-- Reminder Rules List -->
+                    <div id="reminderRulesList" style="margin-top: 20px;">
+                    </div>
+
+                    <button style="margin-top: 16px; padding: 10px 16px; background: var(--light-blue); color: var(--primary-blue); border: 1px solid #bfdbfe; border-radius: 6px; cursor: pointer; font-weight: 500;" onclick="addReminderRule()">+ Add Reminder Rule</button>
+                </div>
+
+                <!-- Step 2 Action Buttons -->
+                <div style="display: flex; gap: 12px; justify-content: space-between; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-gray);">
+                    <button class="btn btn-secondary" onclick="goToStep(1)">Back</button>
+                    <button class="btn btn-primary" onclick="goToStep(3)">Next: Review</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Preview -->
+            <div id="step3" class="card" style="display: none;">
+                <div class="card-header">
+                    <h2>Step 3: Review & Save Activation</h2>
+                </div>
+
+                <div id="previewContent" style="margin-bottom: 20px;"></div>
+
+                <!-- Step 3 Action Buttons -->
+                <div style="display: flex; gap: 12px; justify-content: space-between; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-gray);">
+                    <button class="btn btn-secondary" onclick="goToStep(2)">Back</button>
+                    <button class="btn btn-primary" onclick="saveActivation()">Save Activation</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Survey Selection Modal -->
+    <div id="surveyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                📋 Select Survey
+            </div>
+            <div class="form-group">
+                <input type="text" placeholder="Search surveys..." id="surveySearch" style="margin-bottom: 16px;">
+            </div>
+            <div style="max-height: 400px; overflow-y: auto;">
+                <div style="padding: 12px; border: 1px solid var(--border-gray); border-radius: 6px; cursor: pointer; margin-bottom: 8px;" onclick="selectSurvey('Feedback Webform Survey 09092025140357', 'Email')">
+                    <div style="font-weight: 600;">Feedback Webform Survey 09092025140357</div>
+                    <div style="font-size: 12px; color: #6b7280;">Email • 23 activations</div>
+                </div>
+                <div style="padding: 12px; border: 1px solid var(--border-gray); border-radius: 6px; cursor: pointer; margin-bottom: 8px;" onclick="selectSurvey('Voice Survey Prompt', 'Voice')">
+                    <div style="font-weight: 600;">Voice Survey Prompt</div>
+                    <div style="font-size: 12px; color: #6b7280;">Voice • 15 activations</div>
+                </div>
+                <div style="padding: 12px; border: 1px solid var(--border-gray); border-radius: 6px; cursor: pointer; margin-bottom: 8px;" onclick="selectSurvey('All Channel Survey', 'Multi-channel')">
+                    <div style="font-weight: 600;">All Channel Survey</div>
+                    <div style="font-size: 12px; color: #6b7280;">Multi-channel • 8 activations</div>
+                </div>
+                <div style="padding: 12px; border: 1px solid var(--border-gray); border-radius: 6px; cursor: pointer; margin-bottom: 8px;" onclick="selectSurvey('Customer Satisfaction NPS', 'SMS')">
+                    <div style="font-weight: 600;">Customer Satisfaction NPS</div>
+                    <div style="font-size: 12px; color: #6b7280;">SMS • 5 activations</div>
+                </div>
+                <div style="padding: 12px; border: 1px solid var(--border-gray); border-radius: 6px; cursor: pointer;" onclick="selectSurvey('WhatsApp Feedback Survey', 'WhatsApp')">
+                    <div style="font-weight: 600;">WhatsApp Feedback Survey</div>
+                    <div style="font-size: 12px; color: #6b7280;">WhatsApp • 3 activations</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeSurveyModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // View Management
+        function showListView() {
+            document.getElementById('listView').style.display = 'grid';
+            document.getElementById('createEditView').style.display = 'none';
+        }
+
+        function showCreateEditView() {
+            document.getElementById('listView').style.display = 'none';
+            document.getElementById('createEditView').style.display = 'grid';
+        }
+
+        // Survey Selection
+        function openSurveySelection() {
+            document.getElementById('surveyModal').classList.add('show');
+        }
+
+        function closeSurveyModal() {
+            document.getElementById('surveyModal').classList.remove('show');
+        }
+
+        function selectSurvey(surveyName, channel) {
+            document.getElementById('surveyDisplay').innerHTML = `
+                <span class="survey-icon">📋</span>
+                <div class="survey-info">
+                    <h3>${surveyName}</h3>
+                    <p>${channel} Channel</p>
+                </div>
+                <button class="change-btn" onclick="openSurveySelection()">Change</button>
+            `;
+            closeSurveyModal();
+            showCreateEditView();
+        }
+
+        // Condition Management
+        function removeCondition(btn) {
+            btn.parentElement.remove();
+        }
+
+        function addCondition(btn) {
+            const conditionRow = document.createElement('div');
+            conditionRow.className = 'condition-row';
+            conditionRow.innerHTML = `
+                <select>
+                    <option value="">Select Condition Type</option>
+                    <option value="queue">Queue</option>
+                    <option value="routing">Routing Type</option>
+                    <option value="participant">Participant Data</option>
+                    <option value="custom">Custom Attributes</option>
+                </select>
+                <select>
+                    <option>Is</option>
+                    <option>Is Not</option>
+                    <option>Contains</option>
+                </select>
+                <input type="text" placeholder="Enter value">
+                <button class="remove-btn" onclick="removeCondition(this)">Remove</button>
+            `;
+            btn.parentElement.insertBefore(conditionRow, btn);
+        }
+
+        function addConditionGroup() {
+            const groupNumber = document.querySelectorAll('.condition-group').length + 1;
+            const conditionGroup = document.createElement('div');
+            conditionGroup.className = 'condition-group';
+            conditionGroup.innerHTML = `
+                <div class="condition-group-header">
+                    <span class="condition-group-title">Condition Group #${groupNumber}</span>
+                    <select style="width: auto;">
+                        <option>AND</option>
+                        <option>OR</option>
+                    </select>
+                </div>
+                <div class="condition-row">
+                    <select>
+                        <option value="">Select Condition Type</option>
+                        <option value="queue">Queue</option>
+                        <option value="routing">Routing Type</option>
+                        <option value="participant">Participant Data</option>
+                    </select>
+                    <select>
+                        <option>Is</option>
+                        <option>Is Not</option>
+                    </select>
+                    <input type="text" placeholder="Enter value">
+                    <button class="remove-btn" onclick="removeCondition(this)">Remove</button>
+                </div>
+                <button class="add-condition-btn" onclick="addCondition(this)">+ Add Condition</button>
+            `;
+            document.getElementById('activationConditions').appendChild(conditionGroup);
+        }
+
+        function addDeliveryConditionGroup(btn) {
+            const groupNumber = document.querySelectorAll('.delivery-config .condition-group').length + 1;
+            const conditionGroup = document.createElement('div');
+            conditionGroup.className = 'condition-group';
+            conditionGroup.innerHTML = `
+                <div class="condition-group-header">
+                    <span class="condition-group-title">Condition Group #${groupNumber}</span>
+                    <select style="width: auto;">
+                        <option>AND</option>
+                        <option>OR</option>
+                    </select>
+                </div>
+                <div class="condition-row">
+                    <select>
+                        <option value="">Select Condition Type</option>
+                        <option value="interaction-type">Interaction Type</option>
+                        <option value="queue">Queue</option>
+                        <option value="custom-attr">Custom Attributes</option>
+                        <option value="sentiment">Sentiment Score</option>
+                        <option value="agent">Agent</option>
+                    </select>
+                    <select>
+                        <option>Is</option>
+                        <option>Is Not</option>
+                        <option>Contains</option>
+                    </select>
+                    <input type="text" placeholder="Enter value">
+                    <button class="remove-btn" onclick="removeCondition(this)">Remove</button>
+                </div>
+                <button class="add-condition-btn" onclick="addDeliveryCondition(this)">+ Add Condition</button>
+            `;
+            btn.parentElement.insertBefore(conditionGroup, btn);
+        }
+
+        function addDeliveryCondition(btn) {
+            const conditionRow = document.createElement('div');
+            conditionRow.className = 'condition-row';
+            conditionRow.innerHTML = `
+                <select>
+                    <option value="">Select Condition Type</option>
+                    <option value="interaction-type">Interaction Type</option>
+                    <option value="queue">Queue</option>
+                    <option value="custom-attr">Custom Attributes</option>
+                    <option value="sentiment">Sentiment Score</option>
+                    <option value="agent">Agent</option>
+                </select>
+                <select>
+                    <option>Is</option>
+                    <option>Is Not</option>
+                    <option>Contains</option>
+                </select>
+                <input type="text" placeholder="Enter value">
+                <button class="remove-btn" onclick="removeCondition(this)">Remove</button>
+            `;
+            btn.parentElement.insertBefore(conditionRow, btn);
+        }
+
+        function addReminderConditionGroup(btn) {
+            const groupNumber = btn.closest('.reminder-rule').querySelectorAll('.condition-group').length + 1;
+            const conditionGroup = document.createElement('div');
+            conditionGroup.className = 'condition-group';
+            conditionGroup.innerHTML = `
+                <div class="condition-group-header">
+                    <span class="condition-group-title">Condition Group #${groupNumber}</span>
+                    <select style="width: auto;">
+                        <option>AND</option>
+                        <option>OR</option>
+                    </select>
+                </div>
+                <div class="condition-row">
+                    <select>
+                        <option value="">Select Condition Type</option>
+                        <option value="survey-state">Survey State</option>
+                        <option value="queue">Queue</option>
+                        <option value="interaction-type">Interaction Type</option>
+                        <option value="custom-attr">Custom Attributes</option>
+                    </select>
+                    <select>
+                        <option>Is</option>
+                        <option>Is Not</option>
+                        <option>Contains</option>
+                    </select>
+                    <input type="text" placeholder="Enter value">
+                    <button class="remove-btn" onclick="removeCondition(this)">Remove</button>
+                </div>
+                <button class="add-condition-btn" onclick="addReminderCondition(this)">+ Add Condition</button>
+            `;
+            btn.parentElement.insertBefore(conditionGroup, btn);
+        }
+
+        function addReminderCondition(btn) {
+            const conditionRow = document.createElement('div');
+            conditionRow.className = 'condition-row';
+            conditionRow.innerHTML = `
+                <select>
+                    <option value="">Select Condition Type</option>
+                    <option value="survey-state">Survey State</option>
+                    <option value="queue">Queue</option>
+                    <option value="interaction-type">Interaction Type</option>
+                    <option value="custom-attr">Custom Attributes</option>
+                </select>
+                <select>
+                    <option>Is</option>
+                    <option>Is Not</option>
+                    <option>Contains</option>
+                </select>
+                <input type="text" placeholder="Enter value">
+                <button class="remove-btn" onclick="removeCondition(this)">Remove</button>
+            `;
+            btn.parentElement.insertBefore(conditionRow, btn);
+        }
+
+        // Delivery Configuration
+        function addDeliveryConfig() {
+            const configNumber = document.querySelectorAll('.delivery-config').length + 1;
+            const config = document.createElement('div');
+            config.className = 'delivery-config';
+            config.innerHTML = `
+                <div class="delivery-config-header">
+                    <span class="delivery-config-title">Delivery Rule #${configNumber}</span>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <span class="priority-badge">Priority: ${configNumber}</span>
+                        <button class="icon-btn" onclick="removeDeliveryConfig(this)">🗑️</button>
+                    </div>
+                </div>
+
+                <!-- Delivery Conditions -->
+                <div class="form-group">
+                    <label style="font-weight: 600; margin-bottom: 12px;">Delivery Conditions</label>
+                    <div class="conditions-list delivery-conditions-list" style="margin-bottom: 16px;">
+                    </div>
+                    <button class="add-condition-btn" onclick="addDeliveryConditionGroup(this)">+ Add Condition Group</button>
+                </div>
+
+                <!-- Delivery Actions -->
+                <div class="form-group">
+                    <label style="font-weight: 600; margin-bottom: 12px;">Delivery Actions</label>
+                    
+                    <label style="font-weight: 500; margin-bottom: 8px;">Select Channel</label>
+                    <select style="margin-bottom: 16px;">
+                        <option>-- Select Channel --</option>
+                        <option>Email</option>
+                        <option>SMS</option>
+                        <option>WhatsApp</option>
+                        <option>Web Messaging</option>
+                    </select>
+
+                    <label style="font-weight: 500; margin-bottom: 8px;">Channel Configuration</label>
+                    <input type="text" placeholder="Select or configure channel settings" style="margin-bottom: 16px;">
+
+                    <label>Customer Identification</label>
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <div>
+                            <label style="font-weight: 500; margin-bottom: 8px; display: block;">Participant Data Key</label>
+                            <input type="text" placeholder="e.g., email, phone" value="Feebak Customer Contact" style="width: 100%;">
+                        </div>
+                        <div>
+                            <label style="font-weight: 500; margin-bottom: 8px; display: block;">Custom Attributes Key</label>
+                            <input type="text" placeholder="e.g., email, phone" value="Feebak Customer Contact" style="width: 100%;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Schedule Survey Delivery -->
+                <div class="form-group">
+                    <label style="font-weight: 600; margin-bottom: 12px;">Schedule Survey Delivery</label>
+                    <div style="margin-bottom: 12px;">
+                        <input type="radio" name="schedule${configNumber}" value="immediate" checked> 
+                        <label style="display: inline; font-weight: normal;">Send Immediately</label>
+                    </div>
+                    <div style="margin-bottom: 12px;">
+                        <input type="radio" name="schedule${configNumber}" value="delay"> 
+                        <label style="display: inline; font-weight: normal;">After Delay</label>
+                        <div class="input-group" style="margin-top: 8px; margin-left: 24px;">
+                            <input type="number" placeholder="Enter hours" min="1">
+                            <select>
+                                <option>Hours</option>
+                                <option>Days</option>
+                                <option>Minutes</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <input type="radio" name="schedule${configNumber}" value="timeframe"> 
+                        <label style="display: inline; font-weight: normal;">Specific Time Frame</label>
+                        <div class="input-group" style="margin-top: 8px; margin-left: 24px;">
+                            <select>
+                                <option>Monday - Friday</option>
+                                <option>Monday - Sunday</option>
+                                <option>Custom</option>
+                            </select>
+                            <div class="input-group two" style="grid-template-columns: 1fr 1fr;">
+                                <input type="time" placeholder="From">
+                                <input type="time" placeholder="To">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Insert the new delivery rule before the dedicated Add Delivery Rule button
+            const addBtn = document.getElementById('addDeliveryRuleBtn');
+            if (addBtn && addBtn.parentElement) {
+                addBtn.parentElement.insertBefore(config, addBtn);
+            } else {
+                // fallback: append to delivery tab if button not found
+                const deliveryTab = document.getElementById('tab-delivery');
+                deliveryTab.appendChild(config);
+            }
+        }
+
+        function removeDeliveryConfig(btn) {
+            btn.closest('.delivery-config').remove();
+        }
+
+        // Reminder Management
+        function addReminderRule() {
+            const ruleNumber = document.querySelectorAll('.reminder-rule').length + 1;
+            const rule = document.createElement('div');
+            rule.className = 'reminder-rule';
+            rule.style.cssText = 'border: 1px solid var(--border-gray); border-radius: 6px; padding: 20px; background: white; margin-bottom: 16px;';
+            
+            rule.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-gray);">
+                    <span style="font-weight: 600; font-size: 14px;">Reminder Rule #${ruleNumber}</span>
+                    <button class="icon-btn" onclick="removeReminderRule(this)" style="color: var(--error-red);">🗑️</button>
+                </div>
+
+                <!-- Reminder Conditions -->
+                <div class="form-group">
+                    <label style="font-weight: 600; margin-bottom: 12px;">Reminder Conditions</label>
+                    <div class="reminder-conditions-list" style="margin-bottom: 12px;">
+                    </div>
+                    <button class="add-condition-btn" onclick="addReminderConditionGroup(this)">+ Add Condition Group</button>
+                </div>
+
+                <!-- Retry Configuration for this Rule -->
+                <div class="form-group">
+                    <label style="font-weight: 600; margin-bottom: 12px;">Retry Configuration</label>
+                    
+                    <label style="font-weight: 500; margin-bottom: 8px;">Maximum Retry Count <span class="required">*</span></label>
+                    <select class="reminder-retry-count" onchange="updateReminderRetryConfig(this)">
+                        <option value="1">1</option>
+                        <option value="2" selected>2</option>
+                        <option value="3">3</option>
+                    </select>
+                    <p class="help-text">Number of reminder attempts after initial survey delivery failure</p>
+                </div>
+
+                <div class="form-group">
+                    <label style="font-weight: 600; margin-bottom: 12px;">Retry Settings Mode</label>
+                    <div style="margin-bottom: 16px;">
+                        <input type="radio" name="reminderRetryMode_${ruleNumber}" value="apply-all" class="reminder-retry-mode" checked onchange="updateReminderRetryConfig(this)"> 
+                        <label style="display: inline; font-weight: normal;">Apply Same Settings to All Retries</label>
+                    </div>
+                    <div>
+                        <input type="radio" name="reminderRetryMode_${ruleNumber}" value="per-retry" class="reminder-retry-mode" onchange="updateReminderRetryConfig(this)"> 
+                        <label style="display: inline; font-weight: normal;">Configure Per Individual Retry</label>
+                    </div>
+                </div>
+
+                <!-- Retry Configuration Sections -->
+                <div class="reminder-retry-config-sections" style="margin-top: 16px;">
+                </div>
+            `;
+
+            document.getElementById('reminderRulesList').appendChild(rule);
+            updateReminderRetryConfig(rule.querySelector('.reminder-retry-count'));
+        }
+
+        function removeReminderRule(btn) {
+            btn.closest('.reminder-rule').remove();
+        }
+
+        function updateReminderRetryConfig(element) {
+            const rule = element.closest('.reminder-rule');
+            const retryCount = parseInt(rule.querySelector('.reminder-retry-count').value);
+            const retryMode = rule.querySelector('input[name^="reminderRetryMode_"]:checked').value;
+            const container = rule.querySelector('.reminder-retry-config-sections');
+            
+            container.innerHTML = '';
+
+            if (retryMode === 'apply-all') {
+                // Single configuration section for all retries
+                container.innerHTML = `
+                    <div style="border: 1px solid var(--border-gray); border-radius: 6px; padding: 16px; background: #fafbfc;">
+                        <h4 style="margin: 0 0 16px 0; color: var(--primary-blue); font-size: 13px;">Retry Configuration (Applied to All ${retryCount} Retries)</h4>
+                        
+                        <div class="form-group">
+                            <label style="font-weight: 500; margin-bottom: 8px;">Select Channel</label>
+                            <select style="margin-bottom: 12px;">
+                                <option>-- Select Channel --</option>
+                                <option>Email</option>
+                                <option>SMS</option>
+                                <option>WhatsApp</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="font-weight: 500; margin-bottom: 8px;">Schedule Reminder Delivery</label>
+                            <div style="margin-bottom: 8px;">
+                                <input type="radio" name="scheduleReminder_${rule.getAttribute('data-rule-id')}" value="immediate" checked> 
+                                <label style="display: inline; font-weight: normal; font-size: 13px;">Send Immediately</label>
+                            </div>
+                            <div>
+                                <input type="radio" name="scheduleReminder_${rule.getAttribute('data-rule-id')}" value="delay"> 
+                                <label style="display: inline; font-weight: normal; font-size: 13px;">After Delay</label>
+                                <div class="input-group" style="margin-top: 6px; margin-left: 20px;">
+                                    <input type="number" placeholder="Enter value" min="1">
+                                    <select>
+                                        <option>Hours</option>
+                                        <option>Days</option>
+                                        <option>Minutes</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Individual configuration sections for each retry
+                for (let i = 1; i <= retryCount; i++) {
+                    const retryLabels = ['First', 'Second', 'Third'];
+                    const retryLabel = retryLabels[i - 1] || `#${i}`;
+                    
+                    container.innerHTML += `
+                        <div style="border: 1px solid var(--border-gray); border-radius: 6px; padding: 16px; background: #fafbfc; margin-bottom: 12px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                <span class="retry-number" style="width: 28px; height: 28px; font-size: 13px;">${i}</span>
+                                <h4 style="margin: 0; color: var(--primary-blue); font-size: 13px;">${retryLabel} Reminder Retry</h4>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label style="font-weight: 500; margin-bottom: 8px; font-size: 13px;">Select Channel</label>
+                                <select style="margin-bottom: 12px; font-size: 13px;">
+                                    <option>-- Select Channel --</option>
+                                    <option>Email</option>
+                                    <option>SMS</option>
+                                    <option>WhatsApp</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label style="font-weight: 500; margin-bottom: 8px; font-size: 13px;">Schedule Reminder Delivery</label>
+                                <div style="margin-bottom: 8px;">
+                                    <input type="radio" name="scheduleReminder_${rule.getAttribute('data-rule-id')}_${i}" value="immediate" checked> 
+                                    <label style="display: inline; font-weight: normal; font-size: 13px;">Send Immediately</label>
+                                </div>
+                                <div>
+                                    <input type="radio" name="scheduleReminder_${rule.getAttribute('data-rule-id')}_${i}" value="delay"> 
+                                    <label style="display: inline; font-weight: normal; font-size: 13px;">After Delay</label>
+                                    <div class="input-group" style="margin-top: 6px; margin-left: 20px;">
+                                        <input type="number" placeholder="Enter value" min="1">
+                                        <select>
+                                            <option>Hours</option>
+                                            <option>Days</option>
+                                            <option>Minutes</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Activation Management
+        function editActivation(id) {
+            showCreateEditView();
+            window.scrollTo(0, 0);
+        }
+
+        function duplicateActivation(id) {
+            alert('Duplicating activation #' + id);
+            // Implementation would clone the activation
+        }
+
+        function deleteActivation(id) {
+            if (confirm('Are you sure you want to delete this activation?')) {
+                alert('Deletion of activation #' + id);
+                // Implementation would delete the activation
+            }
+        }
+
+        // Save activation
+        function saveActivation() {
+            alert('Activation saved successfully!');
+            showListView();
+        }
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('surveyModal');
+            if (event.target === modal) {
+                closeSurveyModal();
+            }
+        }
+
+        // Timeline Management
+        function updateTimeline(step) {
+            document.querySelectorAll('.small-timeline-step').forEach((el, idx) => {
+                el.classList.remove('active', 'completed');
+                if (idx + 1 === step) {
+                    el.classList.add('active');
+                } else if (idx + 1 < step) {
+                    el.classList.add('completed');
+                }
+            });
+        }
+
+        // Wizard Navigation
+        function goToStep(step) {
+            // Hide all steps
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step3').style.display = 'none';
+
+            // Show current step
+            if (step === 1) {
+                document.getElementById('step1').style.display = 'block';
+                switchTab('conditions');
+            } else if (step === 2) {
+                const surveyName = document.querySelector('#surveyDisplay .survey-info h3')?.textContent;
+                if (!surveyName || surveyName === 'No Survey Selected') {
+                    alert('Please select a survey first');
+                    document.getElementById('step1').style.display = 'block';
+                    updateTimeline(1);
+                    return;
+                }
+                document.getElementById('step2').style.display = 'block';
+                switchTab('conditions');
+            } else if (step === 3) {
+                document.getElementById('step3').style.display = 'block';
+                updatePreview();
+            }
+
+            updateTimeline(step);
+            window.scrollTo(0, 0);
+        }
+
+        // Tab Management
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-panel').forEach(tab => {
+                tab.style.display = 'none';
+            });
+
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            const tabPanel = document.getElementById('tab-' + tabName);
+            if (tabPanel) {
+                tabPanel.style.display = 'block';
+            }
+
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        // Preview Update
+        function updatePreview() {
+            const surveyName = document.querySelector('#surveyDisplay .survey-info h3')?.textContent || '-';
+            const conditionCount = document.querySelectorAll('#activationConditions .condition-group').length;
+            const deliveryCount = document.querySelectorAll('.delivery-config').length;
+            const remindersEnabled = document.getElementById('enableReminders')?.checked ? 'Enabled' : 'Disabled';
+
+            // Update preview display
+            let previewHTML = `
+                <div style="padding: 16px; background: var(--light-blue); border-radius: 6px; margin-bottom: 16px; border-left: 4px solid var(--primary-blue);">
+                    <h3 style="margin: 0 0 8px 0; color: var(--primary-blue); font-size: 14px;">📋 Survey Selected</h3>
+                    <p style="margin: 0; font-weight: 600;">${surveyName}</p>
+                </div>
+
+                <div style="padding: 16px; background: var(--light-blue); border-radius: 6px; margin-bottom: 16px; border-left: 4px solid var(--primary-blue);">
+                    <h3 style="margin: 0 0 8px 0; color: var(--primary-blue); font-size: 14px;">🎯 Activation Conditions</h3>
+                    <p style="margin: 0;"><strong>${conditionCount}</strong> condition group(s) configured</p>
+                </div>
+
+                <div style="padding: 16px; background: var(--light-blue); border-radius: 6px; margin-bottom: 16px; border-left: 4px solid var(--primary-blue);">
+                    <h3 style="margin: 0 0 8px 0; color: var(--primary-blue); font-size: 14px;">📨 Delivery Settings</h3>
+                    <p style="margin: 0;"><strong>${deliveryCount}</strong> delivery rule(s) configured</p>
+                </div>
+
+                <div style="padding: 16px; background: var(--light-blue); border-radius: 6px; margin-bottom: 16px; border-left: 4px solid var(--primary-blue);">
+                    <h3 style="margin: 0 0 8px 0; color: var(--primary-blue); font-size: 14px;">🔔 Reminder Settings</h3>
+                    <p style="margin: 0;">Reminders: <strong>${remindersEnabled}</strong></p>
+                </div>
+            `;
+
+            document.getElementById('previewContent').innerHTML = previewHTML;
+        }
+    </script>
+</body>
+</html>
